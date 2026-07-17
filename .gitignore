@@ -2,6 +2,8 @@
 oscript_modules/
 out/
 *.ospx
+# opm генерирует src/oscript.cfg при установке (для tests/ он в репозитории).
+/src/oscript.cfg
 
 # Редакторы
 .vscode/
