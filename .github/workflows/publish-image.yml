@@ -1,0 +1,54 @@
+name: Publish Docker Image
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and publish image
+    # Пропускаем, пока не настроен Docker Hub (DOCKERHUB_USERNAME).
+    if: vars.DOCKERHUB_USERNAME != ''
+    uses: docker/github-builder/.github/workflows/build.yml@v1
+    permissions:
+      contents: read
+      id-token: write # sign SLSA provenance attestations
+    with:
+      output: image
+      push: ${{ github.event_name != 'pull_request' }}
+      # Базовый образ evilbeaver/onescript публикуется только под linux/amd64.
+      platforms: linux/amd64
+      file: Dockerfile
+      cache: true
+      meta-images: ${{ vars.DOCKERHUB_REPOSITORY != '' && vars.DOCKERHUB_REPOSITORY || format('{0}/chat-notifier', vars.DOCKERHUB_USERNAME) }}
+      meta-tags: |
+        type=ref,event=branch
+        type=ref,event=tag
+        type=sha,prefix=sha-
+        type=raw,value=latest,enable={{is_default_branch}}
+    secrets:
+      registry-auths: |
+        - registry: docker.io
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  deploy:
+    name: Trigger Railway deployment
+    needs: build
+    runs-on: ubuntu-latest
+    # Запускается только на master и только если настроен сервис Railway.
+    if: github.ref == 'refs/heads/master' && vars.RAILWAY_SERVICE_ID != ''
+    steps:
+      - name: Install Railway CLI
+        run: curl -fsSL https://railway.com/install.sh | sh
+      - name: Trigger Railway redeploy
+        run: railway redeploy --yes --service ${{ vars.RAILWAY_SERVICE_ID }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

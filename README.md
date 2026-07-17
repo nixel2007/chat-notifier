@@ -143,12 +143,31 @@ oneunit e -d tests
 CI (`.github/workflows/testing.yml`) гоняет тесты через переиспользуемый workflow
 `autumn-library/workflows` на матрице версий OneScript.
 
+## Публикация Docker-образа
+
+`.github/workflows/publish-image.yml` собирает образ и публикует его в Docker Hub
+на каждый push в `master` и на теги `v*`. Это выносит `opm install` из среды
+деплоя (в Railway он периодически падал по таймауту к `hub.oscript.io`) - Railway
+тянет уже готовый образ.
+
+Для работы задайте в репозитории:
+
+- переменные (**Settings → Secrets and variables → Actions → Variables**):
+  `DOCKERHUB_USERNAME` (образ публикуется как `<username>/chat-notifier`; либо
+  задайте полное имя в `DOCKERHUB_REPOSITORY`). Для автоredeploy Railway -
+  `RAILWAY_SERVICE_ID`;
+- секреты (**Secrets**): `DOCKERHUB_TOKEN` (Docker Hub access token). Для
+  автоredeploy Railway - `RAILWAY_TOKEN`.
+
+Джоба `deploy` дергает `railway redeploy` только когда задан `RAILWAY_SERVICE_ID`.
+
 ## Деплой в Railway
 
 1. Создайте бота в [@BotFather](https://t.me/BotFather) и получите токен.
 2. Добавьте бота администратором в целевой канал.
-3. В Railway: **New Project → Deploy from GitHub repo**, выберите этот репозиторий.
-   Railway соберёт образ по `Dockerfile` (см. `railway.toml`).
+3. В Railway создайте сервис из **готового Docker-образа**
+   `docker.io/<username>/chat-notifier:latest` (а не из репозитория) - тогда
+   деплой не собирает образ и не упирается в таймауты сети.
 4. В разделе **Variables** задайте `TELEGRAM_BOT_TOKEN` и `PROXY_TOKEN`
    (при необходимости `PROXY_LOGIN`).
 5. В разделе **Settings → Networking** включите публичный домен.

@@ -1,9 +1,9 @@
 # Конфигурация деплоя в Railway.
-# Railway сам передаёт переменную окружения PORT — приложение слушает её.
-
-[build]
-builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+# Образ собирается и публикуется в Docker Hub через
+# .github/workflows/publish-image.yml; сервис Railway разворачивается из готового
+# образа docker.io/<username>/chat-notifier, поэтому секции [build] тут нет -
+# деплой не собирает образ и не упирается в таймауты сети при opm install.
+# Railway сам передаёт переменную окружения PORT - приложение слушает её.
 
 [deploy]
 healthcheckPath = "/health"
