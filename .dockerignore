@@ -1,0 +1,7 @@
+.git
+.github
+tests
+oscript_modules
+out
+*.ospx
+README.md

@@ -1,0 +1,7 @@
+# Зависимости и артефакты OneScript / opm
+oscript_modules/
+out/
+*.ospx
+
+# Редакторы
+.vscode/

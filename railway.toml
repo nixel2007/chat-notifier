@@ -1,0 +1,12 @@
+# Конфигурация деплоя в Railway.
+# Railway сам передаёт переменную окружения PORT — приложение слушает её.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
