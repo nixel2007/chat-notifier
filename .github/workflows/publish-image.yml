@@ -47,7 +47,11 @@ jobs:
     if: github.ref == 'refs/heads/master' && vars.RAILWAY_SERVICE_ID != ''
     steps:
       - name: Install Railway CLI
-        run: curl -fsSL https://railway.com/install.sh | sh
+        # Пайпим в bash: install.sh использует bash-синтаксис, под dash (| sh)
+        # он падает на "Bad substitution". Бинарь ставится в ~/.railway/bin.
+        run: |
+          curl -fsSL https://railway.com/install.sh | bash
+          echo "$HOME/.railway/bin" >> "$GITHUB_PATH"
       - name: Trigger Railway redeploy
         run: railway redeploy --yes --service ${{ vars.RAILWAY_SERVICE_ID }}
         env:
