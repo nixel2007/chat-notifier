@@ -1,21 +1,22 @@
 # ---------------------------------------------------------------------------
-# Прокси отправки сообщений в Telegram: OneScript 2.0.2 + winow + messenger.
+# Прокси отправки сообщений в Telegram: OneScript 2.1 + winow + messenger.
 # Базируемся на официальном образе OneScript (FDD на .NET 8), в нём уже есть
 # oscript и opm на PATH (/var/oscript) и настроенная локаль ru_RU.
 # ---------------------------------------------------------------------------
-FROM evilbeaver/onescript:2.0.2
+FROM evilbeaver/onescript:2.1.0
 
-# Прод-зависимости (autumn 4.0, decorator, validate тянутся транзитивно).
-# winow 0.11.3+ собирает маршруты из определения желудя, а autumn-validate 2.0
-# регистрируется автосканом autumn 4.0 - контроллеры с &Валидно работают "из
-# коробки", без обходных путей.
-RUN opm install winow messenger jason autumn-validate
-
-# Приложение. main.os подключает пакет через #Использовать ".." (нужен lib.config),
-# конфиг autumn-properties.json читается из рабочего каталога.
 WORKDIR /opt/chat-notifier
-COPY lib.config autumn-properties.json ./
+
+# Зависимости ставим локально в ./oscript_modules из packagedef (пины версий).
+# opm install -l читает packagedef, тянет только прод-зависимости (winow,
+# messenger, jason, autumn-validate и их транзитив; autumn 4.0, decorator,
+# validate) и генерирует src/oscript.cfg с lib.additional=../oscript_modules,
+# по которому main.os находит библиотеки. Поэтому packagedef и src нужны до
+# установки.
+COPY packagedef lib.config autumn-properties.json ./
 COPY src ./src
+RUN opm install -l
+
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 

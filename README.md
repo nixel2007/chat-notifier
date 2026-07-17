@@ -6,7 +6,7 @@
 эндпоинт принимает `chat_id`, `message` и авторизацию, а на выходе обращается к
 Telegram Bot API и отправляет сообщение в канал или чат.
 
-Стек: [OneScript](https://oscript.io) 2.0.2, контейнер компонентов
+Стек: [OneScript](https://oscript.io) 2.1, контейнер компонентов
 [autumn](https://github.com/autumn-library/autumn) («ОСень») и веб-сервер
 [winow](https://github.com/autumn-library/winow), сериализация/десериализация
 JSON через [jason](https://github.com/nixel2007/jason), декларативная валидация
